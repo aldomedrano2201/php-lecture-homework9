@@ -16,21 +16,21 @@
             
             // Instantiate a new object $teacher and set its properties  
             require_once('InsertSelectDB.php');
-            $teacher = new InsertSelectDB($firstname, $lastname, $birthday, $email, $phone); 
+            $customer = new InsertSelectDB($firstname, $lastname, $birthday, $email, $phone); 
 
             // Instantiate the method insert() with the object $teacher  
 
-            $teacher->insert(); 
+            $customer->insert(); 
 
     }
     else{
 
              // Instantiate a new object $teacher and set its properties  
             require_once('InsertSelectDB.php');
-            $teacher = new InsertSelectDB("n/a", "n/a", "n/a", "n/a", "n/a");  
+            $customer = new InsertSelectDB("n/a", "n/a", "n/a", "n/a", "n/a");  
 
             // Instantiate the method select() with the object $teacher  
-            $teacher->select();
+            $customer->select();
     }   
 
     

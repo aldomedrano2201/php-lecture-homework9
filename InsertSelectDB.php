@@ -9,7 +9,10 @@
         public function connectToDBMS(){
             require_once ('mylogin.php');
             $this->connection = new mysqli($hn, $un, $pw, $db);
-            return $this->connection;
+            if($this->connection===FALSE)
+                die("Fatal Error - Not possible to connect to MySQL <br>" . mysqli_connect_error());
+            else
+                return TRUE;
         }
 
 
@@ -105,20 +108,27 @@
         private function connectToDB(){
 
             $check_connect_to_db = mysqli_select_db($this->connection, 'customers');
-            return $check_connect_to_db;
+            if($check_connect_to_db===FALSE)
+                die("Fatal Error - Attempt to create DB but not possible to connect to it" . $connection->error);
+                return TRUE;
         }
 
         private function createDB(){
 
             $sql_create_db = "CREATE DATABASE customers";    
             $create_db = $this->connection->query($sql_create_db);
-            return $create_db;
+            if($create_db===FALSE)
+                die("Fatal Error - DB cannot be created" . $connection->error);    
+                return TRUE;
+                
         }
         
         private function connectToTable(){
             $sql_desc_table = "DESC custprofile";
             $check_table_exists = $this->connection->query($sql_desc_table);
-            return $check_table_exists;
+            if($check_table_exists===FALSE)
+                die("Fatal Error - Table does not exist" . $connection->error); 
+                return TRUE;
         }
 
         private function createTableNColumns(){
@@ -137,8 +147,10 @@
                 
                 pnumber VARCHAR(15) NOT NULL); ";
                 $create_table = $this->connection->query($sql_create_table);
-                return $create_table;        
-                
+                //If table creation fails display an error message
+                if($create_table===FALSE and $this->connection->error!=="Table 'custprofile' already exists")
+                    die("Fatal Error - Table customers cannot be created" . $this->connection->error);    
+                return TRUE;
             
 
         }
@@ -148,7 +160,9 @@
                             VALUES ('$this->first_name', '$this->last_name',  
                             '$this->birthday_year', '$this->email_address', '$this->phone_number') ";
             $insert_query = $this->connection->query($sql_insert_query);
-            return $insert_query;
+            if($insert_query===FALSE)
+                die("Fatal Error - Data cannot be inserted in the table<br>" . $connection->error);
+                return TRUE;
         }
 
 
@@ -162,7 +176,7 @@
                 echo 'Your data have been saved to the DB<br>';
                 echo 'Find the data below<br>';
             }
-              
+            
             $select_query = $this->connection->query($sql_select_query);
             
             if ($select_query === FALSE) 
@@ -212,68 +226,62 @@
         public function insert(){
             
                 //If connection to the MySQL fails display an error message
-                if ($this->connectToDBMS() === FALSE) 
-                    die("Fatal Error - Not possible to connect to MySQL <br>" . mysqli_connect_error());
-                else{
-                    if($this->connectToDB() === FALSE){
-                            //If connection to the Database fails create the database
-                        if ($this->createDB() === FALSE){
-                        
-                            //If the Database creation fails display an error message  
-                            if ($this->create_db() === FALSE)
-                                die("Fatal Error - DB cannot be created" . $connection->error);    
-                                //If the Database creation works connect to it
-                            else{ 
-                                
-                                //If connection to the database created fails display an error message
-                                if ($this->connectToDB() === FALSE)
-                                    die("Fatal Error - Attempt to create DB but not possible to connect to it" . $connection->error);
-                            }
+                if ($this->connectToDBMS() === TRUE) {
+                    
+                        if($this->connectToDB() === TRUE){
+                            
+                                    if($this->connectToTable()===TRUE){
+                                        if($this->createTableNColumns()===TRUE){
+                                            if($this->addToTables()===TRUE){
+                                                $this->receivedFromTables("0");
+                                            }
+                                        }else{
+                                            if($this->addToTables()===TRUE){
+                                                $this->receivedFromTables("0");
+                                            }
+                                            
+                                        }
+
+
+
+
+                                    }                     
                         }else{
-                            if($this->connectToTable()===FALSE){
-                                if($this->createTableNColumns()===FALSE){
-                                    //If table creation fails display an error message
-                                    die("Fatal Error - Table customers cannot be created" . $connection->error); 
-                                }else{
-                                    if($this->addToTables()===FALSE){
-                                        die("Fatal Error - Data cannot be inserted in the table<br>" . $connection->error);
+                            if ($this->createDB() === TRUE){
+                                if($this->connectToTable()===FALSE){
+                                    if($this->createTableNColumns()===TRUE){
+                                        if($this->addToTables()===TRUE){
+                                            $this->receivedFromTables("0");
+                                        }
                                     }else{
-                                        $this->receivedFromTables("0");
+                                        if($this->addToTables()===TRUE){
+                                            $this->receivedFromTables("0");
+                                        }
+                                        
                                     }
-                                }
-                            }else{
-                                if($this->addToTables()===FALSE){
-                                    die("Fatal Error - Data cannot be inserted in the table<br>" . $connection->error);
+
+
                                 }else{
-                                    $this->receivedFromTables("0");
+                                    if($this->createTableNColumns()===TRUE){
+                                        if($this->addToTables()===TRUE){
+                                            $this->receivedFromTables("0");
+                                        }
+                                    }else{
+                                        if($this->addToTables()===TRUE){
+                                            $this->receivedFromTables("0");
+                                        }
+                                        
+                                    } 
                                 }
-                            }
+                                
+                            }    
                         }
-                    }else{
-                        if($this->connectToTable()===FALSE){
-                            if($this->createTableNColumns()===FALSE){
-                                //If table creation fails display an error message
-                                die("Fatal Error - Table customers cannot be created" . $connection->error); 
-                            }else{
-                                if($this->addToTables()===FALSE){
-                                    die("Fatal Error - Data cannot be inserted in the table<br>" . $connection->error);
-                                }else{
-                                    $this->receivedFromTables("0");
-                                }
-                            }
-                        }else{
-                            if($this->addToTables()===FALSE){
-                                die("Fatal Error - Data cannot be inserted in the table<br>" . $connection->error);
-                            }else{
-                                $this->receivedFromTables("0");
-                            }
-                        }
-                    }
                 }
+        }
 
             
 
-        }
+        
 
 
     }
